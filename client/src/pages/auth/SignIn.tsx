@@ -107,7 +107,7 @@ const SignIn = () => {
 
           <div className="space-y-6">
             <div className="relative">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <div className="absolute left-4 top-7 transform -translate-y-1/2 text-gray-400">
                 <Mail size={18} />
               </div>
               <input
@@ -126,7 +126,7 @@ const SignIn = () => {
             </div>
 
             <div className="relative">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <div className="absolute left-4 top-7 transform -translate-y-1/2 text-gray-400">
                 <Lock size={18} />
               </div>
               <input

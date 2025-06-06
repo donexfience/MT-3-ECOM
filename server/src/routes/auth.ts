@@ -15,6 +15,7 @@ export class AuthRoutes {
   private initializeRoutes(): void {
     this.router.post("/signup", this.authController.signup);
     this.router.post("/signin", this.authController.login);
+    this.router.post("/logout", this.authController.logout);
     this.router.get("/", (req, res) => {
       res.json({
         message: "API is running!",
