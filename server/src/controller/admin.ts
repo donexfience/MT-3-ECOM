@@ -93,6 +93,44 @@ export class AdminController {
     }
   };
 
+  public getProductById = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        res.status(HttpCode.BAD_REQUEST).json({
+          success: false,
+          message: "Product ID is required",
+        });
+        return;
+      }
+
+      const product = await Product.findById(id).populate({
+        path: "subcategory",
+        populate: { path: "category" },
+      });
+
+      if (!product) {
+        res.status(HttpCode.NOT_FOUND).json({
+          success: false,
+          message: "Product not found",
+        });
+        return;
+      }
+
+      res.status(HttpCode.OK).json({
+        success: true,
+        data: product,
+        message: "Product retrieved successfully",
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to retrieve product");
+    }
+  };
+
   public getSubCategories = async (
     req: Request,
     res: Response

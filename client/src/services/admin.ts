@@ -71,3 +71,12 @@ export const getProducts = async ({
     throw err as AxiosError<APIErrorResponse>;
   }
 };
+
+export const getProductById = async (productId: string) => {
+  try {
+    const response = await axiosInstance.get(`/admin/product/${productId}`);
+    return response.data;
+  } catch (err) {
+    throw err as AxiosError<APIErrorResponse>;
+  }
+};

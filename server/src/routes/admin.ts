@@ -28,6 +28,7 @@ export class AdminRoutes {
       this.adminController.addProduct
     );
     this.router.get("/products", this.adminController.getProducts);
+    this.router.get("/product/:id", this.adminController.getProductById);
 
     // Base route for admin API
     this.router.get("/", (req, res) => {

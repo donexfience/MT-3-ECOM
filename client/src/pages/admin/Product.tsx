@@ -19,6 +19,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ProductSkeleton } from "@/components/skeleton/ProductSkeleton";
+import { useNavigate } from "react-router-dom";
 
 interface ProductProps {
   searchTerm: string;
@@ -69,6 +70,7 @@ interface ProductsResponse {
 }
 
 const Product: React.FC<ProductProps> = ({ searchTerm }) => {
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
@@ -355,6 +357,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
                   {products.map((product) => (
                     <div
                       key={product._id}
+                      onClick={() => navigate(`/home/admin/product/${product._id}`)}
                       className="bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300 group relative transform hover:-translate-y-1"
                     >
                       <div className="absolute top-3 right-3 z-10">

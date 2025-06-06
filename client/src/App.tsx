@@ -13,6 +13,7 @@ import UserProfile from "./pages/profile/UserProfile";
 import UserLayout from "./layouts/UserLayout";
 import Product from "./pages/admin/Product";
 import { useState } from "react";
+import ProductDetailsPage from "./pages/admin/ProductDetails";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,6 +56,10 @@ function App() {
             <Route
               path="product"
               element={<Product searchTerm={searchQuery} />}
+            />
+            <Route
+              path="product/:productId"
+              element={<ProductDetailsPage/>}
             />
           </Route>
 
