@@ -12,7 +12,7 @@ export const Modal = ({
   if (!isOpen) return null;
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center"
+      className="fixed inset-0 z-50 bg-black/30 bg-opacity-50 backdrop-blur-sm flex justify-center items-center"
       onClick={onClose}
     >
       <div

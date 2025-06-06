@@ -86,7 +86,7 @@ export const AddSubcategoryForm = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+    <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-auto transform animate-in zoom-in-95 duration-300 border border-gray-100">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-3">

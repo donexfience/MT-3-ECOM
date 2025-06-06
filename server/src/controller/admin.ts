@@ -160,7 +160,7 @@ export class AdminController {
         variants: parsedVariants,
         subcategory,
         description,
-        images, 
+        images,
       });
 
       await newProduct.save();
@@ -187,11 +187,7 @@ export class AdminController {
       const query: any = {};
 
       if (search.trim()) {
-        query.$or = [
-          { name: { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-          { brand: { $regex: search, $options: "i" } },
-        ];
+        query.title = { $regex: `^${search}`, $options: "i" };
       }
 
       if (subcategory.trim()) {

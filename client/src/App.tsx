@@ -7,13 +7,15 @@ import { ProtectedHome } from "./protected/ProtectHome";
 import { GuestRoute } from "./protected/GuestRoute";
 import { ProtectedRoute } from "./protected/protectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
-import AdminDashboard from "./pages/home/admin/AdminHome";
-import UserDashboard from "./pages/home/user/UserHome";
+// import AdminDashboard from "./pages/home/admin/AdminHome";
+// import UserDashboard from "./pages/home/user/UserHome";
 import UserProfile from "./pages/profile/UserProfile";
 import UserLayout from "./layouts/UserLayout";
 import Product from "./pages/admin/Product";
+import { useState } from "react";
 
 function App() {
+  const [searchQuery, setSearchQuery] = useState("");
   return (
     <>
       <ToastContainer />
@@ -45,12 +47,15 @@ function App() {
             path="/home/admin"
             element={
               <ProtectedRoute requiredRole="admin">
-                <AdminLayout />
+                <AdminLayout onSearch={setSearchQuery} />
               </ProtectedRoute>
             }
           >
-            <Route index element={<AdminDashboard />} />
-            <Route path="product" element={<Product />} />
+            {/* <Route index element={<AdminDashboard />} /> */}
+            <Route
+              path="product"
+              element={<Product searchTerm={searchQuery} />}
+            />
           </Route>
 
           {/* User routes */}
@@ -62,7 +67,7 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<UserDashboard />} />
+            {/* <Route index element={<UserDashboard />} /> */}
             <Route path="profile" element={<UserProfile />} />
           </Route>
 

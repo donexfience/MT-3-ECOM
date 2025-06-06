@@ -65,6 +65,7 @@ export const getProducts = async ({
     const response = await axiosInstance.get("/admin/products", {
       params: { page, limit, search, subcategory },
     });
+    console.log(response, "get products");
     return response.data;
   } catch (err) {
     throw err as AxiosError<APIErrorResponse>;

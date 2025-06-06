@@ -1,15 +1,38 @@
 import { Heart, LogOut, UserCircle, Crown } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUserStore } from "../../store/user";
 import { logout } from "../../services/auth";
 import { toast } from "react-fox-toast";
 import { useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onSearch?: (searchTerm: string) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onSearch }) => {
+  const [inputValue, setInputValue] = useState("");
+  const [debouncedValue, setDebouncedValue] = useState("");
+
   const navigate = useNavigate();
   const clearUser = useUserStore((state) => state.clearUser);
   const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(inputValue.trim());
+    }, 400);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [inputValue]);
+
+  useEffect(() => {
+    if (debouncedValue && onSearch) {
+      onSearch(debouncedValue);
+    }
+  }, [debouncedValue, onSearch]);
 
   const handleLogout = async () => {
     try {
@@ -29,19 +52,20 @@ const Header: React.FC = () => {
 
   return (
     <header className="bg-[#003f5c] text-white px-4 py-3">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center bg-white rounded-lg overflow-hidden shadow-md w-full max-w-md">
-          <input
-            type="text"
-            placeholder="Search anything"
-            className="flex-1 px-4 py-3 text-gray-800 text-sm focus:outline-none"
-          />
-          <button className="bg-[#fcb045] hover:bg-[#f89d1b] text-white px-6 py-3 text-sm font-semibold transition-colors">
-            Search
-          </button>
+      <div className="max-w-full mx-auto flex items-center justify-between">
+        <div className="flex-1 max-w-md">
+          <div className="flex items-center ml-56 bg-white rounded-lg overflow-hidden shadow-md w-full">
+            <input
+              type="text"
+              placeholder="Search anything"
+              className="flex-1 px-4 py-3 text-gray-800 text-sm focus:outline-none"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div className="flex items-center space-x-6 text-sm ml-4">
+        <div className="flex items-center space-x-6 text-sm ml-8">
           {!user ? (
             <>
               <div
@@ -82,13 +106,14 @@ const Header: React.FC = () => {
                 />
                 <div className="text-left text-xs leading-tight">
                   <div className="flex items-center gap-1 font-semibold">
-                    {user.role === "admin" && (
+                    {user.role === "admin" ? (
                       <>
                         <Crown size={12} className="text-yellow-400" />
                         Hello Admin
                       </>
+                    ) : (
+                      "Hello User"
                     )}
-                    {user.role !== "admin" && "Hello User"}
                   </div>
                   <div className="text-white/80">{user.name}</div>
                 </div>
