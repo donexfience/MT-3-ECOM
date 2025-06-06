@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { signupSchema, type SignupFormData } from "../utils/schema/signup";
+import { signupSchema, type SignupFormData } from "../../utils/schema/signup";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
-import bgImage from "../assets/bg.png";
+import bgImage from "../../assets/bg.png";
 import { useNavigate } from "react-router-dom";
-import { signup } from "../services/auth";
+import { signup } from "../../services/auth";
 import { toast } from "react-fox-toast";
 import type { AxiosError } from "axios";
-import { useUserStore } from "../store/user";
+import { useUserStore } from "../../store/user";
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -31,7 +31,6 @@ const Signup: React.FC = () => {
     try {
       const response = await signup(data);
       if (response?.data) {
-        console.log(response, "res");
         setUser(response.data.user);
         toast.success(response?.message);
         navigate("/home");
@@ -40,7 +39,6 @@ const Signup: React.FC = () => {
       reset();
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
-      console.error(axiosError, "axios error");
       const message =
         axiosError.response?.data?.message ||
         "Something went wrong. Please try again.";

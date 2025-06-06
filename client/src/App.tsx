@@ -5,8 +5,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Signup from "./pages/Signup";
-import SignIn from "./pages/SignIn";
+import Signup from "./pages/auth/Signup";
+import SignIn from "./pages/auth/SignIn";
 import { ToastContainer } from "react-fox-toast";
 
 function App() {

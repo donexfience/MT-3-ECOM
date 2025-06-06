@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import bgImage from "../assets/bg.png";
-import { validateEmail } from "../utils/validation/email";
+import bgImage from "../../assets/bg.png";
+import { validateEmail } from "../../utils/validation/email";
 import { useNavigate } from "react-router-dom";
+import { signin } from "../../services/auth";
+import { useUserStore } from "../../store/user";
+import { toast } from "react-fox-toast";
+import type { AxiosError } from "axios";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const setUser = useUserStore((state) => state.setUser);
+
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -66,12 +72,19 @@ const SignIn = () => {
     setIsSubmitting(true);
     try {
       console.log("Form submitted:", formData);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      alert("Signed in successfully!");
+      const response = await signin(formData);
+      if (response?.data) {
+        setUser(response.data.user);
+        toast.success(response?.message);
+        navigate("/home");
+      }
       setFormData({ email: "", password: "" });
     } catch (error) {
-      console.error("Sign in error:", error);
-      alert("Something went wrong. Please try again.");
+      const axiosError = error as AxiosError<{ message: string }>;
+      const message =
+        axiosError.response?.data?.message ||
+        "Something went wrong. Please try again.";
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
