@@ -13,7 +13,7 @@ export const getCategories = async () => {
 
 export const getSubCategories = async () => {
   try {
-    const response = await axiosInstance.post("/admin/subcategories");
+    const response = await axiosInstance.get("/admin/subcategories");
     return response.data;
   } catch (err) {
     throw err as AxiosError<APIErrorResponse>;
@@ -43,7 +43,7 @@ export const addSubcategory = async (categoryId: string, name: string) => {
 
 export const addProduct = async (formData: any) => {
   try {
-    const response = await axiosInstance.post("/products", formData);
+    const response = await axiosInstance.post("/admin/products", formData);
     return response.data;
   } catch (err) {
     throw err as AxiosError<APIErrorResponse>;
@@ -62,7 +62,7 @@ export const getProducts = async ({
   subcategory: string;
 }) => {
   try {
-    const response = await axiosInstance.get("/products", {
+    const response = await axiosInstance.get("/admin/products", {
       params: { page, limit, search, subcategory },
     });
     return response.data;

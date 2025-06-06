@@ -24,7 +24,7 @@ export class AdminRoutes {
     // Product routes
     this.router.post(
       "/products",
-      upload.array("ProductImages", 5),
+      upload.array("images", 5),
       this.adminController.addProduct
     );
     this.router.get("/products", this.adminController.getProducts);
