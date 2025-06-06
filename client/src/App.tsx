@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/home/admin/AdminHome";
 import UserDashboard from "./pages/home/user/UserHome";
 import UserProfile from "./pages/profile/UserProfile";
 import UserLayout from "./layouts/UserLayout";
+import Product from "./pages/admin/Product";
 
 function App() {
   return (
@@ -49,7 +50,7 @@ function App() {
             }
           >
             <Route index element={<AdminDashboard />} />
-            <Route path="dashboard" element={<>/dashboard</>} />
+            <Route path="product" element={<Product />} />
           </Route>
 
           {/* User routes */}

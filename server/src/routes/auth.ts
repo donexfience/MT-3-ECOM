@@ -1,5 +1,4 @@
 import { AuthController } from "@/controller/auth";
-import { UserController } from "@/controller/user";
 import { Router } from "express";
 
 export class AuthRoutes {
@@ -24,6 +23,7 @@ export class AuthRoutes {
           auth: {
             "POST /api/auth/signin": "login to server",
             "POST /api/auth/signup": "signup to server",
+            "LOGOUT /api/auth/logout":"logout from server",
           },
         },
       });
