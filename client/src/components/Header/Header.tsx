@@ -86,8 +86,12 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
           ) : (
             <>
               <div className="flex items-center space-x-1 cursor-pointer hover:text-gray-300">
-                <Heart size={18} />
-                <span>Wishlist</span>
+                {user.role !== "admin" && (
+                  <div>
+                    <Heart size={18} />
+                    <span>Wishlist</span>
+                  </div>
+                )}
               </div>
 
               <div

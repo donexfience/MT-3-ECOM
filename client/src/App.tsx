@@ -14,6 +14,8 @@ import UserLayout from "./layouts/UserLayout";
 import Product from "./pages/admin/Product";
 import { useState } from "react";
 import ProductDetailsPage from "./pages/admin/ProductDetails";
+import NotFoundPage from "./pages/404/NotFound";
+
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,10 +59,7 @@ function App() {
               path="product"
               element={<Product searchTerm={searchQuery} />}
             />
-            <Route
-              path="product/:productId"
-              element={<ProductDetailsPage/>}
-            />
+            <Route path="product/:productId" element={<ProductDetailsPage />} />
           </Route>
 
           {/* User routes */}
@@ -77,7 +76,7 @@ function App() {
           </Route>
 
           {/* Fallback route */}
-          <Route path="*" element={<>Not found</>} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
     </>
