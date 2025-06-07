@@ -1,11 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-interface ProductVariant {
-  ram: string;
-  price: number;
-  quantity: number;
-}
+
 
 interface SubCategory {
   _id: string;

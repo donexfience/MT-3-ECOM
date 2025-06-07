@@ -1,4 +1,4 @@
-import { clearUserFn, useUserStore } from "@/store/user";
+import { clearUserFn } from "@/store/user";
 import axios from "axios";
 
 const axiosInstance = axios.create({

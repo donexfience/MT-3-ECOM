@@ -116,7 +116,7 @@ export const EditProductForm = ({
   };
 
   const removeNewImage = (index: number, setFieldValue: any) => {
-    const updatedFiles = imageFiles.filter((v, i) => i !== index);
+    const updatedFiles = imageFiles.filter((_, i) => i !== index);
     setImageFiles(updatedFiles);
     setFieldValue("images", updatedFiles);
   };

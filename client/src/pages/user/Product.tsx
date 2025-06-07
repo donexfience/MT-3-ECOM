@@ -1,13 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Modal } from "../../components/Modal";
-import { AddProductForm } from "../../components/product/AddProduct";
-import { AddCategoryForm } from "../../components/category/AddCategory";
-import { AddSubcategoryForm } from "../../components/SubCategory/AddSubCategory";
-import {
-  getCategories,
-  getSubCategories,
-  getProducts,
-} from "../../services/admin";
 import { ChevronRight, Loader2, Filter, Menu } from "lucide-react";
 import {
   Pagination,
@@ -79,7 +70,6 @@ interface PRODUCTSRESPONSE {
 
 const UserProduct: React.FC<ProductProps> = ({ searchTerm }) => {
   const navigate = useNavigate();
-  const [activeModal, setActiveModal] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(
@@ -161,8 +151,6 @@ const UserProduct: React.FC<ProductProps> = ({ searchTerm }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const openModal = (modal: string) => setActiveModal(modal);
-  const closeModal = () => setActiveModal(null);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories((prev) => {
