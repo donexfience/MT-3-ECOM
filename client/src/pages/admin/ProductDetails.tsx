@@ -339,28 +339,29 @@ const ProductDetailsPage = () => {
                 <ShoppingCart className="w-5 h-5" />
                 <span>Buy it now</span>
               </button>
-              <button
-                disabled={!isInStock}
-                className="flex-1 bg-yellow-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Edit product
-              </button>
-              
-                {user?.role === "user" && (
-                    <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                className={`p-3 rounded-lg border transition-colors ${
-                  isWishlisted
-                    ? "border-red-500 bg-red-50 text-red-600"
-                    : "border-gray-300 bg-white text-gray-600 hover:border-gray-400"
-                }`}
-              >
+              {user?.role === "admin" && (
+                <button
+                  disabled={!isInStock}
+                  className="flex-1 bg-yellow-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Edit product
+                </button>
+              )}
+
+              {user?.role === "user" && (
+                <button
+                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  className={`p-3 rounded-lg border transition-colors ${
+                    isWishlisted
+                      ? "border-red-500 bg-red-50 text-red-600"
+                      : "border-gray-300 bg-white text-gray-600 hover:border-gray-400"
+                  }`}
+                >
                   <Heart
                     className={`w-5 h-5 ${isWishlisted ? "fill-current" : ""}`}
                   />
-                   </button>
-                )}
-             
+                </button>
+              )}
             </div>
 
             {product.description && (

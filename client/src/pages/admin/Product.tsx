@@ -8,7 +8,7 @@ import {
   getSubCategories,
   getProducts,
 } from "../../services/admin";
-import { Heart, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronRight, Loader2, Filter, Menu } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/pagination";
 import { ProductSkeleton } from "@/components/skeleton/ProductSkeleton";
 import { useNavigate } from "react-router-dom";
+import { CategoriesSidebar } from "@/components/category/CategorySideBar";
+import { ProductCard } from "@/components/product/ProductCard";
 
 interface ProductProps {
   searchTerm: string;
@@ -53,7 +55,7 @@ interface Product {
   variants?: any[];
 }
 
-interface ProductsResponse {
+interface PRODUCTSRESPONSE {
   success: boolean;
   data: Product[];
   pagination: {
@@ -87,15 +89,15 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
   );
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data } = await getCategories();
-        console.log(data, "categoryyyyyyyyyyyyyues");
         setCategories(data);
         const subs = await getSubCategories();
-        console.log(subs.data, "sub cccccccateogory");
         setSubcategories(subs.data);
       } catch (err) {
         console.error("Error fetching categories/subcategories:", err);
@@ -115,9 +117,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
           limit,
           search: searchTerm,
           subcategory: selectedSubcategory || "",
-        })) as ProductsResponse;
-
-        console.log(response, "products");
+        })) as PRODUCTSRESPONSE;
 
         if (response.success && response.data) {
           setProducts(response.data);
@@ -144,6 +144,17 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
     setPage(1);
   }, [searchTerm, selectedSubcategory]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setShowMobileFilters(false);
+        setShowMobileMenu(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const openModal = (modal: string) => setActiveModal(modal);
   const closeModal = () => setActiveModal(null);
 
@@ -154,20 +165,6 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
       else newSet.add(categoryId);
       return newSet;
     });
-  };
-
-  const renderStars = (rating?: number) => {
-    const ratingValue = rating || 0;
-    return Array.from({ length: 5 }, (_, i) => (
-      <span
-        key={i}
-        className={`text-xs ${
-          i < ratingValue ? "text-yellow-400" : "text-gray-300"
-        }`}
-      >
-        ★
-      </span>
-    ));
   };
 
   const generatePaginationItems = () => {
@@ -195,7 +192,6 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
         items.push(1, "...", page - 1, page, page + 1, "...", totalPages);
       }
     }
-
     return items;
   };
 
@@ -220,107 +216,118 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-6 py-4">
-        <div className="flex justify-between items-center mb-6">
+      <div className="w-full px-3 sm:px-4 lg:px-6 py-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
           <div className="flex items-center">
-            <span className="text-gray-600 text-sm">Home</span>
+            <button
+              className="text-gray-600 text-sm"
+              onClick={() => navigate("/home")}
+            >
+              Home
+            </button>
             <ChevronRight size={16} className="mx-2 text-gray-400" />
             <span className="text-gray-900 text-sm font-medium">Products</span>
           </div>
 
-          <div className="flex space-x-3">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
-              onClick={() => openModal("category")}
-              className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="sm:hidden p-2 hover:bg-gray-100 rounded-lg"
             >
-              Add Category
+              <Menu size={20} className="text-gray-600" />
             </button>
-            <button
-              onClick={() => openModal("subcategory")}
-              className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+
+            <div
+              className={`${
+                showMobileMenu ? "flex" : "hidden"
+              } sm:flex flex-col sm:flex-row gap-2 sm:gap-3 absolute sm:relative top-12 sm:top-0 left-3 sm:left-0 right-3 sm:right-0 bg-white sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none shadow-lg sm:shadow-none border sm:border-none z-50`}
             >
-              Add Subcategory
-            </button>
-            <button
-              onClick={() => openModal("product")}
-              className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-            >
-              Add Product
-            </button>
+              <button
+                onClick={() => {
+                  openModal("category");
+                  setShowMobileMenu(false);
+                }}
+                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap"
+              >
+                Add Category
+              </button>
+              <button
+                onClick={() => {
+                  openModal("subcategory");
+                  setShowMobileMenu(false);
+                }}
+                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap"
+              >
+                Add Subcategory
+              </button>
+              <button
+                onClick={() => {
+                  openModal("product");
+                  setShowMobileMenu(false);
+                }}
+                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap"
+              >
+                Add Product
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-6">
-          <div className="w-64 bg-white rounded-xl border border-gray-200 p-4 shadow-sm h-fit">
-            <h3 className="font-semibold text-gray-900 mb-4 text-lg">
-              Categories
-            </h3>
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <Filter size={16} />
+            Filter Categories
+          </button>
+        </div>
 
-            <div className="space-y-1">
-              <div
-                className={`cursor-pointer py-2.5 px-3 rounded-lg text-sm transition-all duration-200 ${
-                  selectedSubcategory === null
-                    ? "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 font-medium border border-orange-200"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-                onClick={() => setSelectedSubcategory(null)}
-              >
-                All Categories
-              </div>
-
-              {categories.map((category) => (
-                <div key={category._id} className="space-y-1">
-                  <div
-                    className="flex items-center justify-between cursor-pointer py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
-                    onClick={() => toggleCategory(category._id)}
-                  >
-                    <span className="text-gray-700 text-sm font-medium">
-                      {category.name}
-                    </span>
-                    {expandedCategories.has(category._id) ? (
-                      <ChevronDown size={14} className="text-gray-400" />
-                    ) : (
-                      <ChevronRight size={14} className="text-gray-400" />
-                    )}
-                  </div>
-
-                  {expandedCategories.has(category._id) && (
-                    <div className="ml-4 space-y-1">
-                      {subcategories
-                        .filter((sub) => sub.category._id === category._id)
-                        .map((sub) => (
-                          <label
-                            key={sub._id}
-                            className="flex items-center py-2 px-3 cursor-pointer hover:bg-gray-50 rounded-lg transition-all duration-200"
-                          >
-                            <input
-                              type="radio"
-                              name="subcategory"
-                              checked={selectedSubcategory === sub._id}
-                              onChange={() => setSelectedSubcategory(sub._id)}
-                              className="w-3.5 h-3.5 text-orange-500 border-gray-300 rounded focus:ring-orange-400 focus:ring-2 mr-3"
-                            />
-                            <span className="text-gray-600 text-sm">
-                              {sub.name}
-                            </span>
-                          </label>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+        <div className="flex gap-4 lg:gap-6 relative">
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <CategoriesSidebar
+              categories={categories}
+              subcategories={subcategories}
+              selectedSubcategory={selectedSubcategory}
+              onSelect={(id) => setSelectedSubcategory(id)}
+              expandedCategories={expandedCategories}
+              onToggleCategory={toggleCategory}
+            />
           </div>
 
-          <div className="flex-1">
+          {showMobileFilters && (
+            <div className="lg:hidden fixed inset-0 z-50 flex">
+              <div
+                className="fixed inset-0 bg-black bg-opacity-50"
+                onClick={() => setShowMobileFilters(false)}
+              />
+              <div className="relative bg-white w-80 max-w-full h-full overflow-y-auto">
+                <CategoriesSidebar
+                  categories={categories}
+                  subcategories={subcategories}
+                  selectedSubcategory={selectedSubcategory}
+                  onSelect={(id) => {
+                    setSelectedSubcategory(id);
+                    setShowMobileFilters(false);
+                  }}
+                  expandedCategories={expandedCategories}
+                  onToggleCategory={toggleCategory}
+                  showCloseButton={true}
+                  onClose={() => setShowMobileFilters(false)}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
                 {[...Array(limit)].map((_, i) => (
                   <ProductSkeleton key={i} />
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
+              <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-12 text-center shadow-sm">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
                     className="w-8 h-8 text-gray-400"
@@ -339,7 +346,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   No products found
                 </h3>
-                <p className="text-gray-500 mb-6">
+                <p className="text-gray-500 mb-6 text-sm sm:text-base">
                   {searchTerm || selectedSubcategory
                     ? "Try adjusting your search or filters to find what you're looking for."
                     : "Get started by adding your first product."}
@@ -353,63 +360,19 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
+                <div className="grid grid-cols chimp-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 mb-6">
                   {products.map((product) => (
-                    <div
+                    <ProductCard
                       key={product._id}
-                      onClick={() => navigate(`/home/admin/product/${product._id}`)}
-                      className="bg-white rounded-xl border border-gray-200 p-3 hover:shadow-lg transition-all duration-300 group relative transform hover:-translate-y-1"
-                    >
-                      <div className="absolute top-3 right-3 z-10">
-                        <button className="w-6 h-6 bg-white rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors shadow-sm">
-                          <Heart
-                            size={12}
-                            className="text-gray-400 group-hover:text-red-400 transition-colors"
-                          />
-                        </button>
-                      </div>
-
-                      <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden flex items-center justify-center">
-                        <img
-                          src={`http://localhost:3000/uploads/${
-                            product.images?.[0] || "placeholder.png"
-                          }`}
-                          alt={product.title}
-                          className="w-4/5 h-4/5 object-contain group-hover:scale-110 transition-transform duration-300"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src =
-                              "https://via.placeholder.com/150x150?text=No+Image";
-                          }}
-                        />
-                      </div>
-
-                      <h3 className="font-medium text-gray-900 text-xs mb-1 line-clamp-2 leading-tight">
-                        {product.title}
-                      </h3>
-                      <p className="text-sm font-bold text-gray-900 mb-2">
-                        ₹{product.price}
-                      </p>
-
-                      <div className="flex items-center mb-1">
-                        {renderStars(product.rating)}
-                        {product.rating && (
-                          <span className="text-xs text-gray-500 ml-1">
-                            ({product.rating})
-                          </span>
-                        )}
-                      </div>
-
-                      {product.subcategory && (
-                        <p className="text-xs text-gray-500 truncate">
-                          {product.subcategory.name}
-                        </p>
-                      )}
-                    </div>
+                      product={product}
+                      onClick={() =>
+                        navigate(`/home/admin/product/${product._id}`)
+                      }
+                    />
                   ))}
                 </div>
                 <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                       {totalProducts > 0 && (
                         <div className="flex items-center space-x-3">
@@ -421,20 +384,23 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600">Show</span>
+                        <span className="text-sm text-gray-600 hidden sm:inline">
+                          Show
+                        </span>
                         <select
                           value={limit}
                           onChange={(e) => {
                             setLimit(Number(e.target.value));
                             setPage(1);
                           }}
-                          className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                          className="bg-white border border-gray-300 rounded-lg px-2 sm:px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
                         >
-                          <option value={10}>10 rows</option>
-                          <option value={20}>20 rows</option>
-                          <option value={50}>50 rows</option>
-                          <option value={100}>100 rows</option>
+                          <option value={10}>10</option>
+                          <option value={20}>20</option>
+                          <option value={50}>50</option>
+                          <option value={100}>100</option>
                         </select>
+                        <span className="text-sm text-gray-600">rows</span>
                       </div>
                     </div>
                   </div>
@@ -442,60 +408,69 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
 
                 {totalPages > 1 && (
                   <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
-                        Showing {start} - {end} of {totalProducts} products
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="text-sm text-gray-600 order-2 sm:order-1">
+                        <span className="hidden sm:inline">
+                          Showing {start} - {end} of {totalProducts} products
+                        </span>
+                        <span className="sm:hidden">
+                          Page {page} of {totalPages}
+                        </span>
                       </div>
 
-                      <Pagination>
-                        <PaginationContent>
-                          {page > 1 && (
-                            <PaginationItem>
-                              <PaginationPrevious
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setPage(page - 1);
-                                }}
-                                className="h-9 px-3"
-                              />
-                            </PaginationItem>
-                          )}
-
-                          {generatePaginationItems().map((item, index) => (
-                            <PaginationItem key={index}>
-                              {item === "..." ? (
-                                <PaginationEllipsis className="h-9 w-9" />
-                              ) : (
-                                <PaginationLink
+                      <div className="order-1 sm:order-2">
+                        <Pagination>
+                          <PaginationContent className="flex-wrap justify-center">
+                            {page > 1 && (
+                              <PaginationItem>
+                                <PaginationPrevious
                                   href="#"
                                   onClick={(e) => {
                                     e.preventDefault();
-                                    setPage(Number(item));
+                                    setPage(page - 1);
                                   }}
-                                  isActive={page === item}
-                                  className="h-9 w-9 text-sm"
-                                >
-                                  {item}
-                                </PaginationLink>
-                              )}
-                            </PaginationItem>
-                          ))}
+                                  className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
+                                />
+                              </PaginationItem>
+                            )}
 
-                          {page < totalPages && (
-                            <PaginationItem>
-                              <PaginationNext
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setPage(page + 1);
-                                }}
-                                className="h-9 px-3"
-                              />
-                            </PaginationItem>
-                          )}
-                        </PaginationContent>
-                      </Pagination>
+                            {generatePaginationItems()
+                              .slice(0, window.innerWidth < 640 ? 5 : undefined)
+                              .map((item, index) => (
+                                <PaginationItem key={index}>
+                                  {item === "..." ? (
+                                    <PaginationEllipsis className="h-8 w-8 sm:h-9 sm:w-9" />
+                                  ) : (
+                                    <PaginationLink
+                                      href="#"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setPage(Number(item));
+                                      }}
+                                      isActive={page === item}
+                                      className="h-8 w-8 sm:h-9 sm:w-9 text-xs sm:text-sm"
+                                    >
+                                      {item}
+                                    </PaginationLink>
+                                  )}
+                                </PaginationItem>
+                              ))}
+
+                            {page < totalPages && (
+                              <PaginationItem>
+                                <PaginationNext
+                                  href="#"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setPage(page + 1);
+                                  }}
+                                  className="h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm"
+                                />
+                              </PaginationItem>
+                            )}
+                          </PaginationContent>
+                        </Pagination>
+                      </div>
                     </div>
                   </div>
                 )}

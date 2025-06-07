@@ -45,7 +45,7 @@ function App() {
 
           {/* Admin routes */}
           <Route
-            path="/home/admin"
+            path="/home"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminLayout onSearch={setSearchQuery} />
@@ -65,7 +65,7 @@ function App() {
 
           {/* User routes */}
           <Route
-            path="/home/user"
+            path="/home"
             element={
               <ProtectedRoute requiredRole="user">
                 <UserLayout />
