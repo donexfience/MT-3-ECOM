@@ -28,7 +28,7 @@ export const AddSubcategoryForm = ({ onClose }: { onClose: () => void }) => {
         const { data } = await getCategories();
         setCategories(data || []);
       } catch (error) {
-        console.error("Failed to fetch categories", error);
+        toast.error("Failed to fetch categories");
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +65,6 @@ export const AddSubcategoryForm = ({ onClose }: { onClose: () => void }) => {
       onClose();
     } catch (error) {
       toast.error("Failed to add subcategory");
-      console.error("Failed to add subcategory", error);
     } finally {
       setIsSubmitting(false);
     }

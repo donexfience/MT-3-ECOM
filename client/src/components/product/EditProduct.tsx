@@ -96,7 +96,6 @@ export const EditProductForm = ({
           images: [],
         });
       } catch (error) {
-        console.error("Failed to fetch data", error);
       } finally {
         setLoading(false);
       }
@@ -104,7 +103,6 @@ export const EditProductForm = ({
 
     fetchData();
   }, [productId]);
-
   const handleImageChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     setFieldValue: any
@@ -146,7 +144,6 @@ export const EditProductForm = ({
       }
       onClose();
     } catch (error) {
-      console.error("Failed to update product", error);
     }
   };
 
@@ -214,7 +211,6 @@ export const EditProductForm = ({
               return {};
             } catch (error) {
               if (error instanceof z.ZodError) {
-                console.log("Validation errors:", error.errors);
                 const errors: any = {};
                 error.errors.forEach((err) => {
                   const path = err.path.join(".");
@@ -435,9 +431,7 @@ export const EditProductForm = ({
                       {existingImages.map((imgUrl, i) => (
                         <div key={`existing-${i}`} className="relative group">
                           <img
-                            src={`${
-                              import.meta.env.VITE_API_URL
-                            }/uploads/${imgUrl}`}
+                            src={`${import.meta.env.VITE_BACKEND_URL_IMAGE}/${imgUrl}`}
                             alt="existing product"
                             className="w-24 h-20 object-cover rounded-xl border-2 border-gray-200"
                           />

@@ -1,7 +1,8 @@
+import Header from "@/components/Header/Header";
 import { Outlet } from "react-router-dom";
-const UserLayout = () => (
+const UserLayout = ({ onSearch }: { onSearch: (value: string) => void }) => (
   <div>
-    {/* <Header /> */}
+    <Header onSearch={onSearch} />
     <Outlet />
   </div>
 );

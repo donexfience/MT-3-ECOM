@@ -10,7 +10,6 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    console.log("interceptor is working");
     const originalRequest = error.config;
     if (originalRequest.url?.includes("/auth/refresh")) {
       return Promise.reject(error);

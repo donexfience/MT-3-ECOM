@@ -15,7 +15,8 @@ import Product from "./pages/admin/Product";
 import { useState } from "react";
 import ProductDetailsPage from "./pages/admin/ProductDetails";
 import NotFoundPage from "./pages/404/NotFound";
-
+import UserProduct from "./pages/user/Product";
+import UserProductDetailsPage from "./pages/user/ProductDetails";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,10 +57,13 @@ function App() {
           >
             {/* <Route index element={<AdminDashboard />} /> */}
             <Route
-              path="product"
+              path="admin/product"
               element={<Product searchTerm={searchQuery} />}
             />
-            <Route path="product/:productId" element={<ProductDetailsPage />} />
+            <Route
+              path="admin/product/:productId"
+              element={<ProductDetailsPage />}
+            />
           </Route>
 
           {/* User routes */}
@@ -67,11 +71,19 @@ function App() {
             path="/home"
             element={
               <ProtectedRoute requiredRole="user">
-                <UserLayout />
+                <UserLayout onSearch={setSearchQuery} />
               </ProtectedRoute>
             }
           >
             {/* <Route index element={<UserDashboard />} /> */}
+            <Route
+              path="user/product"
+              element={<UserProduct searchTerm={searchQuery} />}
+            />
+            <Route
+              path="user/product/:productId"
+              element={<UserProductDetailsPage />}
+            />
             <Route path="profile" element={<UserProfile />} />
           </Route>
 

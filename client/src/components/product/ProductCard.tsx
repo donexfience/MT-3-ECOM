@@ -40,7 +40,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       <div className="aspect-square bg-gray-50 rounded-lg mb-3 overflow-hidden flex items-center justify-center">
         <img
-          src={`http://localhost:3000/uploads/${
+          src={`${import.meta.env.VITE_BACKEND_URL_IMAGE}/${
             product.images?.[0] || "placeholder.png"
           }`}
           alt={product.title}

@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import { Heart, LogOut, UserCircle, Crown } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useUserStore } from "../../store/user";
-import { logout } from "../../services/auth";
+import { useUserStore } from "@/store/user";
+import { logout } from "@/services/auth";
 import { toast } from "react-fox-toast";
 import { useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
+import WishlistSidebar from "../wishlist/Wishlist";
 
 interface HeaderProps {
   onSearch?: (searchTerm: string) => void;
@@ -13,7 +14,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onSearch }) => {
   const [inputValue, setInputValue] = useState("");
   const [debouncedValue, setDebouncedValue] = useState("");
-
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const navigate = useNavigate();
   const clearUser = useUserStore((state) => state.clearUser);
   const user = useUserStore((state) => state.user);
@@ -22,16 +23,11 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     const handler = setTimeout(() => {
       setDebouncedValue(inputValue.trim());
     }, 400);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [inputValue]);
 
   useEffect(() => {
-    if (debouncedValue && onSearch) {
-      onSearch(debouncedValue);
-    }
+    if (debouncedValue && onSearch) onSearch(debouncedValue);
   }, [debouncedValue, onSearch]);
 
   const handleLogout = async () => {
@@ -45,7 +41,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       const message =
         axiosError.response?.data?.message ||
         "Something went wrong. Please try again.";
-      console.error(err);
       toast.error(message);
     }
   };
@@ -85,15 +80,15 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             </>
           ) : (
             <>
-              <div className="flex items-center space-x-1 cursor-pointer hover:text-gray-300">
-                {user.role !== "admin" && (
-                  <div>
-                    <Heart size={18} />
-                    <span>Wishlist</span>
-                  </div>
-                )}
-              </div>
-
+              {user.role !== "admin" && (
+                <div
+                  onClick={() => setIsWishlistOpen(true)}
+                  className="flex items-center space-x-1 cursor-pointer hover:text-gray-300"
+                >
+                  <Heart size={18} />
+                  <span>Wishlist</span>
+                </div>
+              )}
               <div
                 className="flex items-center space-x-1 cursor-pointer hover:text-gray-300"
                 onClick={handleLogout}
@@ -101,7 +96,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
                 <LogOut size={18} />
                 <span>Logout</span>
               </div>
-
               <div className="flex items-center space-x-2 bg-[#022c43] px-3 py-2 rounded-lg shadow-md">
                 <img
                   src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`}
@@ -126,6 +120,9 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
           )}
         </div>
       </div>
+      {isWishlistOpen && (
+        <WishlistSidebar onClose={() => setIsWishlistOpen(false)} />
+      )}
     </header>
   );
 };

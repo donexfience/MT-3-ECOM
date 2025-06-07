@@ -22,6 +22,11 @@ import { ProductSkeleton } from "@/components/skeleton/ProductSkeleton";
 import { useNavigate } from "react-router-dom";
 import { CategoriesSidebar } from "@/components/category/CategorySideBar";
 import { ProductCard } from "@/components/product/ProductCard";
+import {
+  getCategoriesUser,
+  getProductsUser,
+  getSubCategoriesUser,
+} from "@/services/user";
 import { toast } from "react-fox-toast";
 
 interface ProductProps {
@@ -72,7 +77,7 @@ interface PRODUCTSRESPONSE {
   message: string;
 }
 
-const Product: React.FC<ProductProps> = ({ searchTerm }) => {
+const UserProduct: React.FC<ProductProps> = ({ searchTerm }) => {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -96,13 +101,12 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await getCategories();
+        const { data } = await getCategoriesUser();
         setCategories(data);
-        const subs = await getSubCategories();
+        const subs = await getSubCategoriesUser();
         setSubcategories(subs.data);
       } catch (err) {
-        // console.error("Error fetching categories/subcategories:", err);
-        toast.error("failed to fetch sub category")
+        toast.error("Error fetching categories/subcategories");
       } finally {
         setInitialLoading(false);
       }
@@ -114,7 +118,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = (await getProducts({
+        const response = (await getProductsUser({
           page,
           limit,
           search: searchTerm,
@@ -131,7 +135,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
           setTotalPages(0);
         }
       } catch (err) {
-        toast.error("Error fetching products:");
+        toast.error("Error fetching products");
         setProducts([]);
         setTotalProducts(0);
         setTotalPages(0);
@@ -238,40 +242,6 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
             >
               <Menu size={20} className="text-gray-600" />
             </button>
-
-            <div
-              className={`${
-                showMobileMenu ? "flex" : "hidden"
-              } sm:flex flex-col sm:flex-row gap-2 sm:gap-3 absolute sm:relative top-12 sm:top-0 left-3 sm:left-0 right-3 sm:right-0 bg-white sm:bg-transparent p-3 sm:p-0 rounded-lg sm:rounded-none shadow-lg sm:shadow-none border sm:border-none z-50`}
-            >
-              <button
-                onClick={() => {
-                  openModal("category");
-                  setShowMobileMenu(false);
-                }}
-                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap"
-              >
-                Add Category
-              </button>
-              <button
-                onClick={() => {
-                  openModal("subcategory");
-                  setShowMobileMenu(false);
-                }}
-                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap"
-              >
-                Add Subcategory
-              </button>
-              <button
-                onClick={() => {
-                  openModal("product");
-                  setShowMobileMenu(false);
-                }}
-                className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 sm:px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 whitespace-nowrap"
-              >
-                Add Product
-              </button>
-            </div>
           </div>
         </div>
 
@@ -353,12 +323,6 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
                     ? "Try adjusting your search or filters to find what you're looking for."
                     : "Get started by adding your first product."}
                 </p>
-                <button
-                  onClick={() => openModal("product")}
-                  className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                  Add First Product
-                </button>
               </div>
             ) : (
               <>
@@ -368,7 +332,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
                       key={product._id}
                       product={product}
                       onClick={() =>
-                        navigate(`/home/admin/product/${product._id}`)
+                        navigate(`/home/user/product/${product._id}`)
                       }
                     />
                   ))}
@@ -481,18 +445,8 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
           </div>
         </div>
       </div>
-
-      <Modal isOpen={activeModal === "product"} onClose={closeModal}>
-        <AddProductForm onClose={closeModal} />
-      </Modal>
-      <Modal isOpen={activeModal === "category"} onClose={closeModal}>
-        <AddCategoryForm onClose={closeModal} />
-      </Modal>
-      <Modal isOpen={activeModal === "subcategory"} onClose={closeModal}>
-        <AddSubcategoryForm onClose={closeModal} />
-      </Modal>
     </div>
   );
 };
 
-export default Product;
+export default UserProduct;

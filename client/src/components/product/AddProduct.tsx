@@ -3,6 +3,7 @@ import { addProduct, getSubCategories } from "../../services/admin";
 import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
 import { productSchema } from "../../utils/schema/product";
 import { z } from "zod";
+import { toast } from "react-fox-toast";
 
 interface ISubcategory {
   _id: string;
@@ -33,7 +34,7 @@ export const AddProductForm = ({ onClose }: { onClose: () => void }) => {
         const { data } = await getSubCategories();
         setSubcategories(data || []);
       } catch (error) {
-        console.error("Failed to fetch subcategories", error);
+        toast.error("failed to fetch sub categories");
       }
     };
     fetchSubcategories();
@@ -74,14 +75,13 @@ export const AddProductForm = ({ onClose }: { onClose: () => void }) => {
       formData.append("subcategory", values.subcategory);
       formData.append("variants", JSON.stringify(values.variants));
       values.images.forEach((img) => formData.append("images", img));
-      console.log(formData, "new form data");
       await addProduct(formData);
       onClose();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error("Validation errors:", error.errors);
+        // console.error("Validation errors:", error.errors);
       } else {
-        console.error("Failed to add product", error);
+        // console.error("Failed to add product", error);
       }
     }
   };

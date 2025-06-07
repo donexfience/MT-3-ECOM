@@ -71,7 +71,6 @@ const SignIn = () => {
 
     setIsSubmitting(true);
     try {
-      console.log("Form submitted:", formData);
       const response = await signin(formData);
       if (response?.data) {
         setUser(response.data.user);
