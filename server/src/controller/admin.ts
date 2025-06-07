@@ -268,9 +268,10 @@ export class AdminController {
   public editProduct = async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const { title, variants, subcategory, description } = req.body;
+      const { title, variants, subcategory, description, existingImages } =
+        req.body;
 
-      const images = req.files
+      const newImages = req.files
         ? (req.files as Express.Multer.File[]).map((file) => file.filename)
         : [];
 
@@ -320,15 +321,37 @@ export class AdminController {
         });
         return;
       }
+      let finalImages: string[] = [];
+
+      try {
+        const parsedExistingImages = existingImages
+          ? JSON.parse(existingImages)
+          : [];
+        if (Array.isArray(parsedExistingImages)) {
+          finalImages = [...parsedExistingImages];
+        }
+      } catch (error) {
+        console.error("Error parsing existingImages:", error);
+        finalImages = [];
+      }
+
+      if (newImages.length > 0) {
+        finalImages = [...finalImages, ...newImages];
+      }
+
+      if (finalImages.length === 0) {
+        res.status(HttpCode.BAD_REQUEST).json({
+          success: false,
+          message: "At least one image is required",
+        });
+        return;
+      }
 
       product.title = title;
       product.variants = parsedVariants;
       product.subcategory = subcategory;
       product.description = description;
-
-      if (images.length > 0) {
-        product.images = images;
-      }
+      product.images = finalImages;
 
       await product.save();
 

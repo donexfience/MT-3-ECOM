@@ -1,3 +1,4 @@
+import { clearUserFn, useUserStore } from "@/store/user";
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -6,13 +7,34 @@ const axiosInstance = axios.create({
   timeout: 10000,
 });
 
-export default axiosInstance;
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    console.log("interceptor is working");
+    const originalRequest = error.config;
+    if (originalRequest.url?.includes("/auth/refresh")) {
+      return Promise.reject(error);
+    }
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-  },
-  (error) => Promise.reject(error)
+      try {
+        const refreshInstance = axios.create({
+          baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
+          withCredentials: true,
+        });
+        await refreshInstance.post("/auth/refresh");
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        clearUserFn();
+        if (typeof window !== "undefined") {
+          window.location.href = "/home";
+        }
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
+export default axiosInstance;

@@ -195,43 +195,58 @@ export class AuthController {
 
   public refreshToken = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { refreshToken } = req.cookies;
+      const { userId } = req.cookies;
 
-      if (!refreshToken) {
+      if (!userId) {
         res.status(401).json({
           success: false,
-          message: "Refresh token not provided",
+          message: "UserId not provided",
         });
         return;
       }
 
       const decoded = jwt.verify(
-        refreshToken,
-        process.env.JWT_REFRESH_SECRET!
+        userId,
+        process.env.JWT_USRID_SECRET!
       ) as TokenPayload;
+      console.log("decoded user in the refresh enpoint", decoded);
 
       const user = await User.findOne({
         _id: decoded.userId,
-        refreshToken,
       });
 
       if (!user) {
         res.status(401).json({
           success: false,
-          message: "Invalid refresh token",
+          message: "Invalid userId token",
         });
         return;
       }
 
-      const { accessToken, refreshToken: newRefreshToken } =
-        this.TokenManger.generateTokens({
-          _id: (user._id as string).toString(),
-          email: user.email,
-          role: user.role,
-        });
-
+      const {
+        accessToken,
+        refreshToken: newRefreshToken,
+        userId: newUserId,
+      } = this.TokenManger.generateTokens({
+        _id: (user._id as string).toString(),
+        email: user.email,
+        role: user.role,
+      });
       user.refreshToken = newRefreshToken;
       await user.save();
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 3 * 60 * 1000,
+      });
+
+      res.cookie("userId", newUserId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       res.status(200).json({
         success: true,

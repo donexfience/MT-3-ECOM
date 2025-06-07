@@ -1,4 +1,5 @@
 import { AuthController } from "@/controller/auth";
+import { verifyToken } from "../middleware/auth";
 import { Router } from "express";
 
 export class AuthRoutes {
@@ -14,7 +15,8 @@ export class AuthRoutes {
   private initializeRoutes(): void {
     this.router.post("/signup", this.authController.signup);
     this.router.post("/signin", this.authController.login);
-    this.router.post("/logout", this.authController.logout);
+
+    this.router.post("/refresh", this.authController.refreshToken);
     this.router.get("/", (req, res) => {
       res.json({
         message: "API is running!",
@@ -23,11 +25,13 @@ export class AuthRoutes {
           auth: {
             "POST /api/auth/signin": "login to server",
             "POST /api/auth/signup": "signup to server",
-            "LOGOUT /api/auth/logout":"logout from server",
+            "LOGOUT /api/auth/logout": "logout from server",
           },
         },
       });
     });
+
+    this.router.post("/logout", verifyToken, this.authController.logout);
   }
 
   public getRouter(): Router {

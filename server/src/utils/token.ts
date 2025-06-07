@@ -41,8 +41,9 @@ export class TokenManger {
 
     const accessToken = this.generateAccessToken(payload);
     const refreshToken = this.generateRefreshToken(payload);
+    const userId = this.generateUserIdToken(payload.userId);
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken ,userId };
   }
   public generateUserIdToken(userId: string) {
     const payload = { userId };

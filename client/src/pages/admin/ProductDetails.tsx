@@ -63,24 +63,23 @@ const ProductDetailsPage = () => {
   const [selectedProductId, setSelectedProductId] = useState<string>("");
 
   const { productId } = useParams<{ productId: string }>();
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      if (!productId) {
+        throw new Error("Product ID is missing");
+      }
+      const { data } = await getProductById(productId);
+      setProduct(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch product details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        if (!productId) {
-          throw new Error("Product ID is missing");
-        }
-        const { data } = await getProductById(productId);
-        setProduct(data);
-        setError(null);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch product details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProduct();
   }, [productId]);
 
@@ -109,7 +108,7 @@ const ProductDetailsPage = () => {
   };
 
   const handleEditSuccess = () => {
-    console.log("Product updated successfully");
+    fetchProduct();
     toast.success("product edited successfully");
   };
 

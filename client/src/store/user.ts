@@ -28,3 +28,5 @@ export const useUserStore = create<UserStore>()(
     }
   )
 );
+
+export const clearUserFn = () => useUserStore.getState().clearUser;

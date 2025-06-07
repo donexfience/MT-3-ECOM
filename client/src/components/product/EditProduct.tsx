@@ -5,8 +5,8 @@ import {
   getProductById,
 } from "../../services/admin";
 import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
-import { productSchema } from "../../utils/schema/product";
 import { z } from "zod";
+import Loading from "../Loading/Loading";
 
 interface ISubcategory {
   _id: string;
@@ -36,6 +36,20 @@ interface IExistingProduct {
   images: string[];
 }
 
+const productSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  subcategory: z.string().min(1, "Subcategory is required"),
+  variants: z.array(
+    z.object({
+      ram: z.string().min(1, "RAM is required"),
+      price: z.string().min(1, "Price is required"),
+      quantity: z.number().min(0, "Quantity cannot be negative"),
+    })
+  ),
+  images: z.array(z.instanceof(File)).optional(),
+});
+
 export const EditProductForm = ({
   productId,
   onClose,
@@ -63,22 +77,20 @@ export const EditProductForm = ({
         setLoading(true);
         const { data: subcategoriesData } = await getSubCategories();
         const productResponse = await getProductById(productId);
-
-        setSubcategories(subcategoriesData || []);
-
+        const subcats = subcategoriesData || [];
+        setSubcategories(subcats);
         const product: IExistingProduct = productResponse.data;
         setExistingImages(product.images || []);
-
         setInitialFormValues({
           title: product.title || "",
           description: product.description || "",
-          subcategory: product.subCategory?._id || "",
+          subcategory: product.subCategory?._id || subcats[0]?._id || "",
           variants:
             product.variants?.length > 0
               ? product.variants.map((variant) => ({
-                  ram: variant.ram || "",
-                  price: variant.price || "",
-                  quantity: variant.quantity || 1,
+                  ram: String(variant.ram) || "",
+                  price: String(variant.price) || "",
+                  quantity: Number(variant.quantity) || 1,
                 }))
               : [{ ram: "", price: "", quantity: 1 }],
           images: [],
@@ -118,15 +130,15 @@ export const EditProductForm = ({
 
   const handleSubmit = async (values: IFormValues) => {
     try {
-      productSchema.parse(values);
-
       const formData = new FormData();
       formData.append("title", values.title);
       formData.append("description", values.description);
       formData.append("subcategory", values.subcategory);
       formData.append("variants", JSON.stringify(values.variants));
       formData.append("existingImages", JSON.stringify(existingImages));
-      values.images.forEach((img) => formData.append("images", img));
+      if (values.images && values.images.length > 0) {
+        values.images.forEach((img) => formData.append("images", img));
+      }
       await editProduct(productId, formData);
 
       if (onSuccess) {
@@ -134,31 +146,16 @@ export const EditProductForm = ({
       }
       onClose();
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error("Validation errors:", error.errors);
-      } else {
-        console.error("Failed to update product", error);
-      }
+      console.error("Failed to update product", error);
     }
   };
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl p-8 shadow-xl">
-          <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            <span className="text-gray-700 font-medium">
-              Loading product...
-            </span>
-          </div>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
-    <div className="fixed inset-0   bg-black/30 bg-opacity-50 backdrop-blur-sm  flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl px-8 py-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
@@ -211,9 +208,13 @@ export const EditProductForm = ({
           validate={(values) => {
             try {
               productSchema.parse(values);
+              if (existingImages.length === 0 && values.images.length === 0) {
+                return { images: "At least one image is required" };
+              }
               return {};
             } catch (error) {
               if (error instanceof z.ZodError) {
+                console.log("Validation errors:", error.errors);
                 const errors: any = {};
                 error.errors.forEach((err) => {
                   const path = err.path.join(".");
@@ -391,6 +392,11 @@ export const EditProductForm = ({
                   component="div"
                   className="text-red-500 text-sm mt-1"
                 />
+                {subcategories.length === 0 && (
+                  <div className="text-yellow-500 text-sm mt-1">
+                    Warning: No subcategories available. Please check the API.
+                  </div>
+                )}
               </div>
 
               <div>
@@ -429,10 +435,13 @@ export const EditProductForm = ({
                       {existingImages.map((imgUrl, i) => (
                         <div key={`existing-${i}`} className="relative group">
                           <img
-                            src={`http://localhost:3000/uploads/${imgUrl}`}
+                            src={`${
+                              import.meta.env.VITE_API_URL
+                            }/uploads/${imgUrl}`}
                             alt="existing product"
                             className="w-24 h-20 object-cover rounded-xl border-2 border-gray-200"
                           />
+
                           <button
                             type="button"
                             onClick={() => removeExistingImage(i)}
@@ -490,11 +499,11 @@ export const EditProductForm = ({
                   Green border = New images | Gray border = Existing images
                 </p>
 
-                <ErrorMessage
-                  name="images"
-                  component="div"
-                  className="text-red-500 text-sm mt-2"
-                />
+                {existingImages.length === 0 && imageFiles.length === 0 && (
+                  <div className="text-red-500 text-sm mt-2">
+                    At least one image is required
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
