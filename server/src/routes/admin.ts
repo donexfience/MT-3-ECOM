@@ -27,10 +27,14 @@ export class AdminRoutes {
       upload.array("images", 5),
       this.adminController.addProduct
     );
+    this.router.put(
+      "/product/:id",
+      upload.array("images", 5),
+      this.adminController.editProduct
+    );
     this.router.get("/products", this.adminController.getProducts);
     this.router.get("/product/:id", this.adminController.getProductById);
 
-    // Base route for admin API
     this.router.get("/", (req, res) => {
       res.json({
         message: "Admin API is running!",

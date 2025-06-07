@@ -9,6 +9,8 @@ import { AuthRoutes } from "./routes/auth";
 import { AuthController } from "./controller/auth";
 import { AdminController } from "./controller/admin";
 import { AdminRoutes } from "./routes/admin";
+import { UserController } from "./controller/user";
+import { UserRoutes } from "./routes/user";
 dotenv.config();
 
 class Server {
@@ -16,16 +18,20 @@ class Server {
   private port: number;
   private authController: AuthController;
   private adminController: AdminController;
+  private userController: UserController;
   private authRoutes: AuthRoutes;
   private adminRoutes: AdminRoutes;
+  private userRoutes: UserRoutes;
 
   constructor(port: number = 3000) {
     this.app = express();
     this.port = port;
     this.authController = new AuthController();
     this.adminController = new AdminController();
+    this.userController = new UserController();
     this.authRoutes = new AuthRoutes(this.authController);
     this.adminRoutes = new AdminRoutes(this.adminController);
+    this.userRoutes = new UserRoutes(this.userController);
 
     this.initializeMiddlewares();
     this.initializeRoutes();
@@ -54,6 +60,7 @@ class Server {
   private initializeRoutes(): void {
     this.app.use("/api/auth", this.authRoutes.getRouter());
     this.app.use("/api/admin", this.adminRoutes.getRouter());
+    this.app.use("/api/user", this.userRoutes.getRouter());
 
     this.app.get("/health", (req, res) => {
       res.status(200).json({

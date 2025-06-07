@@ -264,6 +264,84 @@ export class AdminController {
       this.handleError(res, error, "Failed to retrieve products");
     }
   };
+
+  public editProduct = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { title, variants, subcategory, description } = req.body;
+
+      const images = req.files
+        ? (req.files as Express.Multer.File[]).map((file) => file.filename)
+        : [];
+
+      if (!id || !title || !variants || !subcategory || !description) {
+        res.status(HttpCode.BAD_REQUEST).json({
+          success: false,
+          message:
+            "Product ID, title, variants, subcategory, and description are required",
+        });
+        return;
+      }
+
+      const product = await Product.findById(id);
+      if (!product) {
+        res.status(HttpCode.NOT_FOUND).json({
+          success: false,
+          message: "Product not found",
+        });
+        return;
+      }
+
+      const parsedVariants = JSON.parse(variants);
+
+      if (!Array.isArray(parsedVariants) || parsedVariants.length === 0) {
+        res.status(HttpCode.BAD_REQUEST).json({
+          success: false,
+          message: "At least one variant is required",
+        });
+        return;
+      }
+
+      for (const variant of parsedVariants) {
+        if (!variant.ram || !variant.price || !variant.quantity) {
+          res.status(HttpCode.BAD_REQUEST).json({
+            success: false,
+            message: "Each variant must have RAM, price, and quantity",
+          });
+          return;
+        }
+      }
+
+      const subCategoryExists = await SubCategory.findById(subcategory);
+      if (!subCategoryExists) {
+        res.status(HttpCode.BAD_REQUEST).json({
+          success: false,
+          message: "Selected subcategory does not exist",
+        });
+        return;
+      }
+
+      product.title = title;
+      product.variants = parsedVariants;
+      product.subcategory = subcategory;
+      product.description = description;
+
+      if (images.length > 0) {
+        product.images = images;
+      }
+
+      await product.save();
+
+      res.status(HttpCode.OK).json({
+        success: true,
+        data: product,
+        message: "Product updated successfully",
+      });
+    } catch (error) {
+      this.handleError(res, error, "Failed to update product");
+    }
+  };
+
   private handleError(res: Response, error: any, message: string): void {
     console.error(`Error: ${message}`, error);
     res.status(HttpCode.INTERNAL_SERVER_ERROR).json({

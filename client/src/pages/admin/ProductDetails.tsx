@@ -1,3 +1,4 @@
+import { EditProductForm } from "@/components/product/EditProduct";
 import { getProductById } from "@/services/admin";
 import { useUserStore } from "@/store/user";
 import {
@@ -11,7 +12,8 @@ import {
   Star,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { toast } from "react-fox-toast";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface Subcategory {
   _id: string;
@@ -48,8 +50,8 @@ interface Product {
 }
 
 const ProductDetailsPage = () => {
+  const navigate = useNavigate();
   const user = useUserStore((state) => state.user);
-
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +59,8 @@ const ProductDetailsPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string>("");
 
   const { productId } = useParams<{ productId: string }>();
 
@@ -97,6 +101,21 @@ const ProductDetailsPage = () => {
   const handleVariantChange = (variantIndex: number) => {
     setSelectedVariant(variantIndex);
     setQuantity(1);
+  };
+
+  const handleEditProduct = (productId: string) => {
+    setSelectedProductId(productId);
+    setShowEditModal(true);
+  };
+
+  const handleEditSuccess = () => {
+    console.log("Product updated successfully");
+    toast.success("product edited successfully");
+  };
+
+  const handleCloseModal = () => {
+    setShowEditModal(false);
+    setSelectedProductId("");
   };
 
   if (loading) {
@@ -164,6 +183,13 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
+      {showEditModal && (
+        <EditProductForm
+          productId={selectedProductId}
+          onClose={handleCloseModal}
+          onSuccess={handleEditSuccess}
+        />
+      )}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -175,7 +201,7 @@ const ProductDetailsPage = () => {
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
               <nav className="flex items-center space-x-2 text-sm text-gray-500">
-                <span>Home</span>
+                <button onClick={() => navigate("/home")}>Home</button>
                 <span>/</span>
                 <span>{product.subcategory?.name}</span>
                 <span>/</span>
@@ -343,6 +369,7 @@ const ProductDetailsPage = () => {
                 <button
                   disabled={!isInStock}
                   className="flex-1 bg-yellow-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  onClick={() => handleEditProduct(product._id)}
                 >
                   Edit product
                 </button>

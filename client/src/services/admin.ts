@@ -80,3 +80,15 @@ export const getProductById = async (productId: string) => {
     throw err as AxiosError<APIErrorResponse>;
   }
 };
+
+export const editProduct = async (productId: string, formData: FormData) => {
+  try {
+    const response = await axiosInstance.put(
+      `/admin/product/${productId}`,
+      formData
+    );
+    return response.data;
+  } catch (err) {
+    throw err as AxiosError<APIErrorResponse>;
+  }
+};

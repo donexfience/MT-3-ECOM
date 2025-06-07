@@ -366,7 +366,7 @@ const Product: React.FC<ProductProps> = ({ searchTerm }) => {
                       key={product._id}
                       product={product}
                       onClick={() =>
-                        navigate(`/home/admin/product/${product._id}`)
+                        navigate(`/home/product/${product._id}`)
                       }
                     />
                   ))}
