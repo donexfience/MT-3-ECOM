@@ -1,17 +1,48 @@
-import { removeFromWishlistUser } from "@/services/user";
-import { useWishlistStore } from "@/store/wishlist";
-import { Star, Trash2, X, Heart, ShoppingBag } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getWishlistUser, removeFromWishlistUser } from "@/services/user";
+import { Heart, ShoppingBag, X, Star, Trash2 } from "lucide-react";
 import { toast } from "react-fox-toast";
 
 interface WishlistSidebarProps {
   onClose: () => void;
 }
 
-const WishlistSidebar: React.FC<WishlistSidebarProps> = ({ onClose }) => {
-  const { wishlist, removeFromWishlist } = useWishlistStore();
+export const WishlistSidebar: React.FC<WishlistSidebarProps> = ({
+  onClose,
+}) => {
+  const [wishlist, setWishlist] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const getImageUrl = (imageName: string) =>
     `${import.meta.env.VITE_BACKEND_URL_IMAGE}/${imageName}`;
+
+  const fetchWishlist = async () => {
+    try {
+      const { data } = await getWishlistUser();
+      console.log(data);
+      setWishlist(data.items || []);
+    } catch (error) {
+      toast.error("Failed to load wishlist.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemove = async (productId: string) => {
+    try {
+      await removeFromWishlistUser(productId);
+      setWishlist((prev) =>
+        prev.filter((item) => item.product._id !== productId)
+      );
+      toast.success("Product removed from wishlist");
+    } catch {
+      toast.error("Failed to remove product");
+    }
+  };
+
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
 
   return (
     <>
@@ -36,7 +67,11 @@ const WishlistSidebar: React.FC<WishlistSidebarProps> = ({ onClose }) => {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {wishlist?.items.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              Loading wishlist...
+            </div>
+          ) : wishlist.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Heart className="w-12 h-12 text-gray-400" />
@@ -58,12 +93,11 @@ const WishlistSidebar: React.FC<WishlistSidebarProps> = ({ onClose }) => {
           ) : (
             <div className="p-4 space-y-4">
               <div className="text-sm text-gray-600 mb-4">
-                {wishlist?.items.length}{" "}
-                {wishlist?.items.length === 1 ? "item" : "items"} in your
-                wishlist
+                {wishlist.length} {wishlist.length === 1 ? "item" : "items"} in
+                your wishlist
               </div>
 
-              {wishlist?.items.map((item, index) => (
+              {wishlist.map((item, index) => (
                 <div
                   key={item.product._id}
                   className="group bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:border-pink-200"
@@ -124,11 +158,7 @@ const WishlistSidebar: React.FC<WishlistSidebarProps> = ({ onClose }) => {
                         </button>
 
                         <button
-                          onClick={() => {
-                            removeFromWishlistUser(item.product._id);
-                            removeFromWishlist(item.product._id);
-                            toast.success("product removed");
-                          }}
+                          onClick={() => handleRemove(item.product._id)}
                           className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 group/btn"
                           aria-label="Remove from wishlist"
                         >
@@ -155,7 +185,7 @@ const WishlistSidebar: React.FC<WishlistSidebarProps> = ({ onClose }) => {
             transform: translateX(0);
           }
         }
-        
+
         .line-clamp-2 {
           display: -webkit-box;
           -webkit-line-clamp: 2;
