@@ -109,3 +109,5 @@ export const verifyUser = (
     });
   }
 };
+
+export const requrieUser = [verifyToken, verifyUser];

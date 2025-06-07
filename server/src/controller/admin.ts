@@ -331,7 +331,6 @@ export class AdminController {
           finalImages = [...parsedExistingImages];
         }
       } catch (error) {
-        console.error("Error parsing existingImages:", error);
         finalImages = [];
       }
 
@@ -366,7 +365,6 @@ export class AdminController {
   };
 
   private handleError(res: Response, error: any, message: string): void {
-    console.error(`Error: ${message}`, error);
     res.status(HttpCode.INTERNAL_SERVER_ERROR).json({
       success: false,
       message,

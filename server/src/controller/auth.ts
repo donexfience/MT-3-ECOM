@@ -209,7 +209,6 @@ export class AuthController {
         userId,
         process.env.JWT_USRID_SECRET!
       ) as TokenPayload;
-      console.log("decoded user in the refresh enpoint", decoded);
 
       const user = await User.findOne({
         _id: decoded.userId,
@@ -287,7 +286,6 @@ export class AuthController {
   };
 
   private handleError(res: Response, error: any, message: string): void {
-    console.error(`Error: ${message}`, error);
     res.status(500).json({
       success: false,
       message,
