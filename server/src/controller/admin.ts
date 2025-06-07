@@ -70,6 +70,15 @@ export class AdminController {
         });
         return;
       }
+
+      const existingSubCategoryName = await SubCategory.findOne({ name });
+      if (existingSubCategoryName) {
+        res.status(HttpCode.CONFLICT).json({
+          success: false,
+          message: "A Category with the same title already exists",
+        });
+        return;
+      }
       const existingSubCategory = await SubCategory.findOne({
         name,
         category: categoryId,
@@ -160,6 +169,15 @@ export class AdminController {
         res.status(HttpCode.BAD_REQUEST).json({
           success: false,
           message: "Title, variants, subcategory, and description are required",
+        });
+        return;
+      }
+
+      const existingProduct = await Product.findOne({ title });
+      if (existingProduct) {
+        res.status(HttpCode.CONFLICT).json({
+          success: false,
+          message: "A product with the same title already exists",
         });
         return;
       }
@@ -280,6 +298,19 @@ export class AdminController {
           success: false,
           message:
             "Product ID, title, variants, subcategory, and description are required",
+        });
+        return;
+      }
+
+      const duplicateTitleProduct = await Product.findOne({
+        title,
+        _id: { $ne: id },
+      });
+
+      if (duplicateTitleProduct) {
+        res.status(HttpCode.CONFLICT).json({
+          success: false,
+          message: "Another product with the same title already exists",
         });
         return;
       }
